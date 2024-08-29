@@ -1,11 +1,6 @@
-# Use the official Nginx image from Docker Hub
 FROM nginx
-
-# Copy custom Nginx configuration file
+RUN rm -rf /usr/share/nginx/html/index.html
+ADD static /usr/share/nginx/html/
+RUN rm -rf /etc/nginx/nginx.conf
 COPY nginx.conf /etc/nginx/nginx.conf
-
-# Copy your application files
-COPY * /usr/share/nginx/html
-
-# Expose port 80
-EXPOSE 80
+RUN rm -rf /etc/nginx/conf.d/default.conf
