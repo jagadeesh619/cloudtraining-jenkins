@@ -5,7 +5,7 @@ FROM nginx:latest
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copy your application files
-COPY Jenkins/* /usr/share/nginx/html
+COPY * /usr/share/nginx/html
 
 # Expose port 80
 EXPOSE 80
