@@ -11,9 +11,7 @@ pipeline {
            steps{
             sh """ 
 
-            pip install -r requirements.txt
-
-            zip -q -r sampleweb.zip ./* -x "Jenkinsfile*" -x "README*" 
+            zip -q -r sampleweb.zip ./* -x "Jenkinsfile*" 
 
             """
            }
