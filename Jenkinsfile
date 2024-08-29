@@ -8,7 +8,7 @@ pipeline {
     stages {
 
         stage('build') {
-
+           steps{
             sh """ 
 
             pip install -r requirements.txt
@@ -16,11 +16,13 @@ pipeline {
             zip -q -r sampleweb.zip ./* -x "Jenkinsfile*" -x "README*" 
 
             """
+           }
         }
 
         stage('test'){
-            
+            steps{
             echo "unit test cases are successfully tested "
+            }
         }
 
         stage('Deploy to Elastic Beanstalk') {
