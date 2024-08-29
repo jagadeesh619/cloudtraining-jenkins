@@ -38,7 +38,7 @@ pipeline {
                     // Create or update Elastic Beanstalk application version
                     sh '''
                     aws elasticbeanstalk create-application-version \
-                        --application-name samplewebapp \
+                        --application-name Samplewebapp-env \
                         --version-label ${BUILD_NUMBER} \
                         --source-bundle S3Bucket=aws.week2.cloudtraining,S3Key=sampleweb.zip
                     '''
@@ -46,7 +46,7 @@ pipeline {
                     // Update Elastic Beanstalk environment to use the new version
                     sh '''
                     aws elasticbeanstalk update-environment \
-                        --application-name samplewebapp \
+                        --application-name Samplewebapp-env \
                         --environment-name Samplewebapp-env \
                         --version-label ${BUILD_NUMBER}
                     '''
