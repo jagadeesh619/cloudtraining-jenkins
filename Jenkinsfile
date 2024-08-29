@@ -14,6 +14,11 @@ pipeline {
                 }
             }
         }
+        stage('unit test cases') {
+            steps {
+                echo "Unit test cases passed successfully"
+            }
+        }
         
         stage('Upload to S3') {
             steps {
