@@ -1,66 +1,69 @@
 pipeline {
     agent any
-
     environment {
         AWS_DEFAULT_REGION = 'us-east-1'
         AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
     }
-
     stages {
         stage('Build') {
             steps {
                 script {
-                    // Zip the application files, excluding the Jenkinsfile
+                    // Create a ZIP file of your application
                     sh 'zip -q -r sampleweb.zip ./* -x "Jenkinsfile*"'
                 }
             }
         }
-
-        stage('Test') {
+        
+        stage('Upload to S3') {
             steps {
-                // Placeholder for running unit tests
-                echo "Unit test cases are successfully tested."
+                script {
+                    // Install AWS CLI if not already installed
+                    sh 'pip3 install awscli --upgrade --user'
+                    
+                    // Configure AWS CLI (if not already configured)
+                    sh 'aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}'
+                    sh 'aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}'
+                    sh 'aws configure set region ${AWS_DEFAULT_REGION}'
+                    
+                    // Upload ZIP file to S3 bucket
+                    sh 'aws s3 cp sampleweb.zip s3://aws.week2.cloudtraining/sampleweb.zip'
+                }
             }
         }
 
         stage('Deploy to Elastic Beanstalk') {
             steps {
                 script {
-                    // Install AWS Elastic Beanstalk CLI using pip3.6
-                    sh 'pip3.6 install awsebcli --upgrade --user'
+                    // Create or update Elastic Beanstalk application version
+                    sh '''
+                    aws elasticbeanstalk create-application-version \
+                        --application-name samplewebapp \
+                        --version-label ${BUILD_NUMBER} \
+                        --source-bundle S3Bucket=aws.week2.cloudtraining,S3Key=sampleweb.zip
+                    '''
 
-                    // Ensure that the `eb` command is in the PATH
-                    sh 'export PATH=$PATH:~/.local/bin'
-
-                    // Configure EB CLI
-                    sh 'eb init -p python-3.6 samplewebapp --region us-east-1'
-
-                    // Create or update environment (ignore error if environment already exists)
-                    sh 'eb create Samplewebapp-env || true'
-
-                    // Deploy the application
-                    sh 'eb deploy'
+                    // Update Elastic Beanstalk environment to use the new version
+                    sh '''
+                    aws elasticbeanstalk update-environment \
+                        --application-name samplewebapp \
+                        --environment-name Samplewebapp-env \
+                        --version-label ${BUILD_NUMBER}
+                    '''
                 }
             }
         }
     }
-
     post {
         always {
-            // Clean up the workspace
             deleteDir()
-            echo "Deleted previous workspace"
+            echo "Workspace cleaned up."
         }
         success {
-            // Actions to take on successful pipeline run
-            echo "Your pipeline job was successful, sending mail..."
-            // Add mail sending logic here if needed
+            echo "Deployment succeeded."
         }
         failure {
-            // Actions to take on pipeline failure
-            echo "Your pipeline job failed, sending mail..."
-            // Add mail sending logic here if needed
+            echo "Deployment failed."
         }
     }
 }
